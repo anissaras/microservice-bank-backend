@@ -7,14 +7,13 @@ import net.anissa.accountservice.repository.BankAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
 public class BankAccountRestController {
-    private final BankAccountRepository bankAccountRepository;
+    private BankAccountRepository bankAccountRepository;
     private final CustomerRestClient customerRestClient;
 
     public BankAccountRestController(BankAccountRepository bankAccountRepository, CustomerRestClient customerRestClient) {
@@ -23,7 +22,11 @@ public class BankAccountRestController {
     }
     @GetMapping("/accounts")
     public List<BankAccount> bankAccountList(){
-        return bankAccountRepository.findAll();
+        List<BankAccount> bankAccountList = bankAccountRepository.findAll();
+        bankAccountList.forEach( b-> {
+            b.setCustomer(customerRestClient.findCustomerById(b.getCustomerId()));
+        });
+        return bankAccountList;
     }
 
     @GetMapping("/accounts/{id}")
